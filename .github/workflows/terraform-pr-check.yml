@@ -3,7 +3,7 @@ name: Terraform PR Validation
 on:
   pull_request:
     branches:
-      - **   # Trigger for PRs targeting any branch
+      - "**"
 
 jobs:
   terraform-validate:
