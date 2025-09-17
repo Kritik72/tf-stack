@@ -9,7 +9,7 @@ on:
         default: "dev"
 
 jobs:
-  terraform-plan:
+  terraform-validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,11 +30,8 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false
 
-      - name: Terraform Validate
-        run: terraform validate -var-file=enviornments/${{ github.event.inputs.environment }}/${{ github.event.inputs.environment }}.tfvars
+      - name: Terraform Format Check
+        run: terraform fmt -check
 
-      - name: Upload plan
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: tfplan
+      - name: Terraform Validate
+        run: terraform validate
