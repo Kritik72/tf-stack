@@ -28,7 +28,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Terraform Init
-        run: terraform init -input=false -backend-config=env/${{ github.event.inputs.environment }}/backend.tfvars
+        run: terraform init -input=false -backend-config=enviornments/${{ github.event.inputs.environment }}/backend.tfvars
 
       - name: Terraform Validate
         run: terraform validate
