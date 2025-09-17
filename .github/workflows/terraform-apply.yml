@@ -27,7 +27,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Terraform Init
+      - name: Terraform Init -backend-config=enviornments/${{ github.event.inputs.environment }}/backend.tfvars
         run: terraform init -input=false
 
       - name: Download plan
