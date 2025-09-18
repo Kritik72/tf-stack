@@ -32,6 +32,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Set S3 bucket
+        id: bucket
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
+            echo "bucket=my-dev-terraform-plan" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.environment }}" = "uat" ]; then
+            echo "bucket=my-uat-terraform-plan" >> $GITHUB_ENV
+          else
+            echo "bucket=my-prod-terraform-plan" >> $GITHUB_ENV
+          fi
+
       - name: Terraform Init
         run: terraform init -input=false -backend-config=enviornments/${{ github.event.inputs.environment }}/backend.tfvars
 
@@ -39,7 +50,7 @@ jobs:
         run: terraform plan -out=tfplan -input=false -var-file=enviornments/${{ github.event.inputs.environment }}/${{ github.event.inputs.environment }}.tfvars
 
       - name: Upload plan to S3
-        run: aws s3 cp tfplan s3://my-dev-terraform-plan-${{ github.event.inputs.environment }}/tfplan
+        run: aws s3 cp tfplan s3://$bucket/tfplan
 
   terraform-apply:
     if: github.event.inputs.action == 'apply'
@@ -60,11 +71,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Set S3 bucket
+        id: bucket
+        run: |
+          if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
+            echo "bucket=my-dev-terraform-plan" >> $GITHUB_ENV
+          elif [ "${{ github.event.inputs.environment }}" = "uat" ]; then
+            echo "bucket=my-uat-terraform-plan" >> $GITHUB_ENV
+          else
+            echo "bucket=my-prod-terraform-plan" >> $GITHUB_ENV
+          fi
+
       - name: Terraform Init
         run: terraform init -input=false -backend-config=enviornments/${{ github.event.inputs.environment }}/backend.tfvars
 
       - name: Download plan from S3
-        run: aws s3 cp s3://my-dev-terraform-plan-${{ github.event.inputs.environment }}/tfplan tfplan
+        run: aws s3 cp s3://$bucket/tfplan tfplan
 
       - name: Terraform Apply
         run: terraform apply -input=false tfplan
