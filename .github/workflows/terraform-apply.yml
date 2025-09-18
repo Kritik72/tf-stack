@@ -1,4 +1,4 @@
-name: Terraform Workflow
+name: Terraform Apply
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: "dev"
 
 jobs:
-  terraform:
+  terraform-apply:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,19 +30,10 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false -backend-config=enviornments/${{ github.event.inputs.environment }}/backend.tfvars
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -out=tfplan -input=false -var-file=enviornments/${{ github.event.inputs.environment }}/${{ github.event.inputs.environment }}.tfvars
-
-      - name: Show Plan Output
-        run: terraform show tfplan
-
-      # 👇 Manual approval step before apply
-      - name: Wait for approval
-        uses: trstringer/manual-approval@v1
+      - name: Download plan artifact
+        uses: actions/download-artifact@v4
         with:
-          approvers: ${{ github.actor }}   # only you can approve, can add more
-          instructions: "Review the Terraform plan above. Approve to proceed with apply."
+          name: tfplan
 
       - name: Terraform Apply
         run: terraform apply -input=false tfplan
